@@ -7,14 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #121212;
-            --surface: #1e1e1e;
-            --primary: #00ffcc;
-            --primary-hover: #00cca3;
-            --text: #ffffff;
-            --text-secondary: #aaaaaa;
-            --danger: #ff4757;
-            --success: #2ed573;
+            --bg-color: #121212; --surface: #1e1e1e; --primary: #00ffcc;
+            --primary-hover: #00cca3; --text: #ffffff; --text-secondary: #aaaaaa;
+            --danger: #ff4757; --success: #2ed573;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
@@ -35,61 +30,41 @@
             cursor: pointer; transition: 0.2s; 
         }
         button:active { transform: scale(0.98); }
-        .btn-grade, .btn-diff { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .btn-grade { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .btn-grade:hover, .btn-diff:hover { border-color: var(--primary); }
-        .btn-diff { position: relative; }
         
-        .info-icon { 
-            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); 
-            border-radius: 50%; width: 24px; height: 24px; font-size: 12px; 
-            display: flex; align-items: center; justify-content: center; 
-        }
-        
-        .btn-primary { background: var(--primary); color: #000; border: none; width: 100%; margin-top: auto; }
+        .btn-primary { background: var(--primary); color: #000; border: none; width: 100%; }
         .btn-primary:hover { background: var(--primary-hover); }
-        .btn-primary:disabled { background: #555; color: #888; cursor: not-allowed; }
-        
-        .btn-back { background: transparent; border: 1px solid var(--text-secondary); width: 100%; margin-top: 15px; }
+        .btn-outline { background: transparent; border: 2px solid var(--text-secondary); width: 100%; }
         
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .timer { font-size: 24px; font-weight: 800; color: var(--primary); }
         .timer.warning { color: var(--danger); }
         
+        .question-counter { text-align: center; color: var(--text-secondary); margin-bottom: 10px; font-size: 14px; }
         .question-box { background: var(--surface); padding: 20px; border-radius: 12px; margin-bottom: 20px; font-size: 18px; line-height: 1.5; }
         
-        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; flex-grow: 1; }
         .option-btn { background: var(--surface); border: 2px solid #333; text-align: left; }
         .option-btn.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
         
-        .num-input { 
-            width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #333; 
-            background: var(--surface); color: var(--text); font-size: 20px; text-align: center; 
-            margin-bottom: 20px; outline: none; 
-        }
-        .num-input:focus { border-color: var(--primary); }
+        .nav-buttons { display: flex; gap: 10px; margin-top: auto; }
+        .nav-buttons button { flex: 1; }
         
-        .result-huge { font-size: 48px; text-align: center; font-weight: 800; color: var(--primary); margin: 40px 0; }
+        .result-huge { font-size: 64px; text-align: center; font-weight: 800; color: var(--primary); margin: 20px 0; }
         
         .floating-btn { 
             position: fixed; bottom: 20px; right: 20px; background: var(--surface); 
             border: 2px solid var(--primary); color: var(--primary); border-radius: 50%; 
-            width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; 
-            font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100;
+            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; 
+            font-size: 20px; z-index: 100;
         }
-
-        /* Modal */
-        .modal-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 20px;
-        }
-        .modal-content { background: var(--surface); padding: 25px; border-radius: 16px; width: 100%; max-width: 400px; position: relative; }
-        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <!-- Screen 1: Grade Selection -->
+    <!-- Екран 1: Вибір класу -->
     <div id="screen-grade" class="screen active">
         <h1>MATH QUEST</h1>
         <p style="text-align: center; margin-bottom: 20px; color: var(--text-secondary);">Обери останній закінчений клас</p>
@@ -105,131 +80,259 @@
         </div>
     </div>
 
-    <!-- Screen 2: Difficulty Selection -->
+    <!-- Екран 2: Вибір складності -->
     <div id="screen-diff" class="screen">
         <h2>Обери складність</h2>
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <button class="btn-diff" onclick="startTask('easy')">
-                <span style="color: var(--success); font-size: 20px;">🟢 Легкий</span>
-                <span class="info-icon" onclick="event.stopPropagation(); showTopics('easy')">i</span>
-            </button>
-            <button class="btn-diff" onclick="startTask('medium')">
-                <span style="color: #ffa502; font-size: 20px;">🟡 Середній</span>
-                <span class="info-icon" onclick="event.stopPropagation(); showTopics('medium')">i</span>
-            </button>
-            <button class="btn-diff" onclick="startTask('hard')">
-                <span style="color: var(--danger); font-size: 20px;">🔴 Складний</span>
-                <span class="info-icon" onclick="event.stopPropagation(); showTopics('hard')">i</span>
-            </button>
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+            <button class="btn-diff" onclick="setDifficulty('easy')">🟢 Легкий (Макс. 6 балів)</button>
+            <button class="btn-diff" onclick="setDifficulty('medium')">🟡 Середній (Макс. 8 балів)</button>
+            <button class="btn-diff" onclick="setDifficulty('hard')">🔴 Складний (Макс. 10 балів)</button>
         </div>
-        <button class="btn-back" onclick="navTo('screen-grade')">← Назад</button>
+        <button class="btn-outline" style="margin-top: auto;" onclick="navTo('screen-grade')">← Назад</button>
     </div>
 
-    <!-- Screen 3: Task -->
+    <!-- Екран 3: Готовність -->
+    <div id="screen-ready" class="screen">
+        <h2>ПІДГОТОВКА</h2>
+        <div class="question-box" style="text-align: center;">
+            <p style="margin-bottom: 10px; color: var(--text-secondary);">Клас: <strong id="ready-grade" style="color: var(--text);"></strong></p>
+            <p style="margin-bottom: 10px; color: var(--text-secondary);">Складність: <strong id="ready-diff" style="color: var(--text);"></strong></p>
+            <p style="margin-bottom: 10px; color: var(--text-secondary);">Завдань: <strong id="ready-count" style="color: var(--text);"></strong></p>
+            <p style="margin-bottom: 10px; color: var(--text-secondary);">Час: <strong style="color: var(--text);">2 хвилини</strong></p>
+            <hr style="border-color: #333; margin: 15px 0;">
+            <p style="font-size: 14px;">Ти можеш пропускати завдання і повертатися до них. Таймер спільний для всіх завдань.</p>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn-outline" onclick="navTo('screen-diff')">Назад</button>
+            <button class="btn-primary" onclick="startQuiz()">ПОЧАТИ</button>
+        </div>
+    </div>
+
+    <!-- Екран 4: Завдання -->
     <div id="screen-task" class="screen">
         <div class="header-bar">
             <div id="task-badge" style="background: var(--surface); padding: 5px 12px; border-radius: 8px; font-weight: 600;"></div>
-            <div id="timer" class="timer">00:00</div>
+            <div id="timer" class="timer">02:00</div>
         </div>
+        <div class="question-counter" id="q-counter">Питання 1 з 5</div>
         <div class="question-box" id="question-text">Завантаження...</div>
         
-        <div id="input-area"></div>
+        <div class="options-list" id="options-area"></div>
 
-        <button id="btn-submit" class="btn-primary" onclick="submitAnswer()" disabled>Підтвердити</button>
+        <div class="nav-buttons">
+            <button class="btn-outline" id="btn-prev" onclick="changeQuestion(-1)">← Попереднє</button>
+            <button class="btn-primary" id="btn-next" onclick="changeQuestion(1)">Наступне →</button>
+        </div>
+        <button class="btn-primary" id="btn-finish" style="display: none; margin-top: 10px; background: var(--success);" onclick="finishQuiz()">Завершити тест</button>
     </div>
 
-    <!-- Screen 4: Result -->
+    <!-- Екран 5: Результат -->
     <div id="screen-result" class="screen">
         <h2>РЕЗУЛЬТАТ</h2>
-        <div id="result-msg" style="text-align: center; font-size: 20px;"></div>
-        <div id="result-score" class="result-huge">0 БАЛІВ</div>
-        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px;">Покажи цей екран адміністратору</p>
-        <button class="btn-primary" onclick="resetApp()">На головну</button>
+        <div id="result-stats" style="text-align: center; color: var(--text-secondary);"></div>
+        <div id="result-score" class="result-huge">0</div>
+        <p style="text-align: center; font-weight: 600; margin-bottom: 5px;">БАЛІВ</p>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">Покажи цей екран адміністратору</p>
+        <button class="btn-primary" style="margin-top: auto;" onclick="resetApp()">На головну</button>
     </div>
     
-    <button class="floating-btn" id="btn-formula" onclick="showFormulas()" style="display: none;">ƒ</button>
-</div>
-
-<!-- Modal -->
-<div id="modal" class="modal-overlay" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h3 id="modal-title" style="margin-bottom: 15px;"></h3>
-        <div id="modal-body" style="color: var(--text-secondary); line-height: 1.6;"></div>
-    </div>
+    <button class="floating-btn" id="btn-formula" onclick="alert('У розробці')" style="display: none;">ƒ</button>
 </div>
 
 <script>
 /* =========================================
-   АДМІН-ПАНЕЛЬ (НАЛАШТУВАННЯ ТА ЗАДАЧІ)
+   КОНФІГУРАЦІЯ
    ========================================= */
-
 const CONFIG = {
-    points: { easy: 1, medium: 2, hard: 3 },
-    time: { easy: 45, medium: 90, hard: 150 } // в секундах
+    totalTime: 120, // 2 хвилини на всі завдання (в секундах)
+    maxPoints: { easy: 6, medium: 8, hard: 10 },
+    questionsCount: { easy: 5, medium: 4, hard: 3 } // Скільки питань дається на кожному рівні
 };
 
-// Тут зберігаються теми для відображення по кнопці "i"
-const TOPICS = {
-    4: "Арифметика, час, периметр.",
-    8: "Лінійні рівняння, корені, теорема Піфагора, площі.",
-    9: "Системи, нерівності, вектори, прогресії, ймовірність.",
-    10: "Функції, тригонометрія, ірраціональні рівняння.",
-    11: "Логарифми, похідна, інтеграл, об'єми тіл."
-    // Для інших класів можна додати за аналогією
-};
+const diffLabels = { easy: "Легкий", medium: "Середній", hard: "Складний" };
 
-// ОСНОВНИЙ МАСИВ ЗАДАЧ
-// Структура: TASKS[клас][складність] = [ { q: "Питання", options: ["А","Б","В","Г"], ans: 0 }, ... ]
-// Для складного рівня (hard) масиву options немає, ans - це число/рядок.
+/* =========================================
+   БАЗА ЗАВДАНЬ (Мінімум необхідна кількість для кожного класу/рівня)
+   ========================================= */
 const TASKS = {
     4: {
         easy: [
-            { q: "Обчисли: 1200 - 350", options: ["950", "850", "800", "750"], ans: 1 }
+            { q: "Обчисли: 150 + 250", options: ["300", "400", "350", "450"], ans: 1 },
+            { q: "Скільки хвилин у 2 годинах?", options: ["60", "120", "90", "100"], ans: 1 },
+            { q: "Периметр квадрата зі стороною 5 см:", options: ["10 см", "25 см", "20 см", "15 см"], ans: 2 },
+            { q: "Обчисли: 1000 - 450", options: ["650", "550", "450", "600"], ans: 1 },
+            { q: "3 км — це скільки метрів?", options: ["300", "3000", "30", "30000"], ans: 1 }
         ],
         medium: [
-            { q: "Автомобіль їхав 3 год зі швидкістю 60 км/год. Яку відстань він проїхав?", options: ["20 км", "180 км", "120 км", "240 км"], ans: 1 }
+            { q: "Автомобіль їхав 3 год зі швидкістю 60 км/год. Відстань?", options: ["180 км", "120 км", "90 км", "200 км"], ans: 0 },
+            { q: "Знайди площу прямокутника 4 см на 7 см.", options: ["22 см²", "11 см²", "28 см²", "24 см²"], ans: 2 },
+            { q: "Магазин продав 5 ящиків яблук по 12 кг. Скільки всього кг?", options: ["50", "60", "72", "55"], ans: 1 },
+            { q: "Скільки місяців у 4 роках?", options: ["36", "48", "40", "24"], ans: 1 }
         ],
         hard: [
-            { q: "Периметр квадрата дорівнює 36 см. Знайди його площу (у см²).", ans: "81" }
+            { q: "Периметр квадрата 36 см. Знайди його площу.", options: ["81 см²", "72 см²", "64 см²", "36 см²"], ans: 0 },
+            { q: "У трьох класах 90 учнів. У першому 32, у другому 28. Скільки у третьому?", options: ["30", "28", "32", "26"], ans: 0 },
+            { q: "Знайди третину від числа 120, а потім додай 15.", options: ["45", "55", "35", "50"], ans: 1 }
+        ]
+    },
+    5: {
+        easy: [
+            { q: "2.5 + 1.5 = ?", options: ["3", "4.5", "4", "3.5"], ans: 2 },
+            { q: "Знайди 10% від 200.", options: ["10", "20", "2", "50"], ans: 1 },
+            { q: "Який дріб більший: 1/2 чи 1/3?", options: ["1/2", "1/3", "Рівні", "Неможливо визначити"], ans: 0 },
+            { q: "Середнє арифметичне 4 і 8.", options: ["5", "6", "7", "12"], ans: 1 },
+            { q: "Перетвори 0.75 у звичайний дріб.", options: ["1/4", "3/4", "1/2", "3/5"], ans: 1 }
+        ],
+        medium: [
+            { q: "5.4 - 2.7 = ?", options: ["3.3", "2.7", "2.3", "3.7"], ans: 1 },
+            { q: "Середнє арифметичне чисел 2, 5, 8.", options: ["5", "4", "6", "15"], ans: 0 },
+            { q: "В класі 30 учнів, 20% - відмінники. Скільки відмінників?", options: ["5", "6", "8", "4"], ans: 1 },
+            { q: "Розв'яжи: 2x = 7.2", options: ["3.6", "3.1", "14.4", "4.2"], ans: 0 }
+        ],
+        hard: [
+            { q: "Знайди число, якщо його 15% дорівнюють 45.", options: ["200", "450", "300", "150"], ans: 2 },
+            { q: "Сума двох чисел 24, одне більше за інше вдвічі. Знайди менше число.", options: ["8", "12", "6", "4"], ans: 0 },
+            { q: "Скільки градусів становить 1/6 розгорнутого кута?", options: ["30°", "60°", "15°", "20°"], ans: 0 }
+        ]
+    },
+    6: {
+        easy: [
+            { q: "-15 + 8 = ?", options: ["-7", "-23", "7", "23"], ans: 0 },
+            { q: "Знайди модуль |-12|.", options: ["-12", "12", "0", "24"], ans: 1 },
+            { q: "2/3 від 15 дорівнює:", options: ["5", "10", "12", "30"], ans: 1 },
+            { q: "Розв'яжи пропорцію: x/4 = 3/2", options: ["8", "6", "12", "2"], ans: 1 },
+            { q: "-4 * (-5) = ?", options: ["-20", "20", "-9", "9"], ans: 1 }
+        ],
+        medium: [
+            { q: "Обчисли: |-12| - |-4| * 2", options: ["4", "16", "8", "-4"], ans: 0 },
+            { q: "Відстань на карті 3 см, масштаб 1:100000. Відстань на місцевості?", options: ["3 км", "30 км", "300 м", "300 км"], ans: 0 },
+            { q: "-18 / (-3) + 2 = ?", options: ["8", "-4", "-8", "4"], ans: 0 },
+            { q: "Розв'яжи: 3x - 5 = 10", options: ["4", "5", "15", "-5"], ans: 1 }
+        ],
+        hard: [
+            { q: "Знайди невідоме: 0.2 / x = 0.5 / 10", options: ["2", "4", "0.4", "5"], ans: 1 },
+            { q: "Ціна товару зросла з 400 до 500 грн. На скільки відсотків?", options: ["20%", "25%", "100%", "15%"], ans: 1 },
+            { q: "Яке число знаходиться рівно посередині між -8 та 4?", options: ["-2", "-4", "-6", "0"], ans: 0 }
+        ]
+    },
+    7: {
+        easy: [
+            { q: "Спрости: x³ * x⁴", options: ["x^12", "x^7", "2x^7", "x"], ans: 1 },
+            { q: "(a - b)(a + b) = ?", options: ["a² + b²", "a² - b²", "a² - 2ab + b²", "a - b"], ans: 1 },
+            { q: "Суміжні кути. Один 60°, інший:", options: ["30°", "120°", "90°", "60°"], ans: 1 },
+            { q: "2³ = ?", options: ["6", "8", "16", "9"], ans: 1 },
+            { q: "Розв'яжи: 2x = x + 5", options: ["-5", "1", "5", "2.5"], ans: 2 }
+        ],
+        medium: [
+            { q: "Суміжні кути відносяться як 1 до 2. Більший кут?", options: ["120°", "90°", "60°", "150°"], ans: 0 },
+            { q: "Спрости: (2x³)²", options: ["4x^6", "2x^6", "4x^5", "2x^5"], ans: 0 },
+            { q: "Розв'яжи: 4(x - 2) = 2x + 2", options: ["5", "3", "4", "2"], ans: 0 },
+            { q: "Сума кутів трикутника дорівнює:", options: ["90°", "360°", "180°", "270°"], ans: 2 }
+        ],
+        hard: [
+            { q: "Спрости: (x-3)² - x(x-6)", options: ["9", "-9", "-6x+9", "3x"], ans: 0 },
+            { q: "В рівнобедреному трикутнику кут при вершині 40°. Кут при основі?", options: ["70°", "140°", "60°", "80°"], ans: 0 },
+            { q: "Система: x+y=5, x-y=1. Знайди x*y.", options: ["6", "4", "5", "8"], ans: 0 }
+        ]
+    },
+    8: {
+        easy: [
+            { q: "√64 - √25 = ?", options: ["3", "13", "-3", "8"], ans: 0 },
+            { q: "Гіпотенуза 10, катет 6. Інший катет?", options: ["4", "8", "16", "64"], ans: 1 },
+            { q: "Спрости: 2x(x - 3) - 2x²", options: ["-6x", "6x", "-3x", "-6"], ans: 0 },
+            { q: "√x = 9, x = ?", options: ["3", "18", "81", "27"], ans: 2 },
+            { q: "Площа квадрата 49 см². Сторона?", options: ["14", "7", "24.5", "9"], ans: 1 }
+        ],
+        medium: [
+            { q: "(x-2)/3 = (x+1)/4. x = ?", options: ["5", "11", "-11", "2"], ans: 1 },
+            { q: "Площа прямокутника 48, сторона 6. Периметр?", options: ["28", "14", "54", "48"], ans: 0 },
+            { q: "(√5 - √2)(√5 + √2) = ?", options: ["7", "√3", "3", "21"], ans: 2 },
+            { q: "x² - 9 = 0. Корені?", options: ["3", "9", "-3 і 3", "немає"], ans: 2 }
+        ],
+        hard: [
+            { q: "Більший корінь: x² - 5x + 6 = 0", options: ["2", "3", "6", "-1"], ans: 1 },
+            { q: "Діагоналі ромба 10 і 24. Сторона ромба?", options: ["17", "13", "12", "26"], ans: 1 },
+            { q: "Спрости (a²-9)/(a+3) при a=15", options: ["12", "15", "18", "8"], ans: 0 }
         ]
     },
     9: {
         easy: [
-            { q: "У коробці 4 червоні та 6 білих кульок. Яка ймовірність витягнути червону?", options: ["0.4", "0.6", "4", "0.1"], ans: 0 },
-            { q: "Перший член арифм. прогресії a1 = 5, різниця d = 3. Знайдіть a3.", options: ["8", "14", "11", "15"], ans: 2 }
+            { q: "Ймовірність випадання парного числа на кубику?", options: ["1/6", "1/3", "1/2", "1"], ans: 2 },
+            { q: "Вектор c = a + b. a(2;-1), b(3;4). c = ?", options: ["(1;5)", "(5;3)", "(-1;-5)", "(6;-4)"], ans: 1 },
+            { q: "Арифм. прогресія: a1=5, d=3. a3=?", options: ["8", "14", "11", "15"], ans: 2 },
+            { q: "Координати вектора AB. A(1;3), B(5;6)", options: ["(4;3)", "(6;9)", "(-4;-3)", "(4;-3)"], ans: 0 },
+            { q: "Нерівність: 2x > 8. x є:", options: ["(4; +∞)", "[4; +∞)", "(-∞; 4)", "(-4; 4)"], ans: 0 }
         ],
         medium: [
-            { q: "Знайдіть модуль вектора m(-3; 4).", options: ["7", "1", "25", "5"], ans: 3 },
-            { q: "Розв'яжіть нерівність x² - 4 > 0.", options: ["x > 2", "x є (-2; 2)", "x є (-∞;-2) U (2;+∞)", "x < 4"], ans: 2 }
+            { q: "Сума перших 5 членів арифм. прог., a1=2, a5=10", options: ["60", "30", "12", "24"], ans: 1 },
+            { q: "Модуль вектора m(-3; 4)", options: ["7", "1", "25", "5"], ans: 3 },
+            { q: "x² - 4 > 0. Розв'язок:", options: ["x > 2", "(-2; 2)", "(-∞;-2) U (2;+∞)", "x < 4"], ans: 2 },
+            { q: "Геом. прог: q=2, b1=3. b3=?", options: ["6", "9", "12", "24"], ans: 2 }
         ],
         hard: [
-            { q: "У геом. прогресії b1 = 2, q = 3. Знайдіть b4.", ans: "54" },
-            { q: "Скільки цілих розв'язків має нерівність x² - 5x - 6 <= 0?", ans: "8" }
+            { q: "Геом. прог: b1=2, q=3. b4=?", options: ["54", "18", "36", "162"], ans: 0 },
+            { q: "Скалярний добуток a(x;3) і b(4;-2) дорівнює 10. x=?", options: ["4", "2", "6", "-1"], ans: 0 },
+            { q: "Скільки цілих розв'язків: x² - 5x - 6 <= 0", options: ["5", "7", "8", "6"], ans: 2 }
+        ]
+    },
+    10: {
+        easy: [
+            { q: "sin 30° + cos 60° = ?", options: ["0", "1", "√3", "0.5"], ans: 1 },
+            { q: "Область визначення: y = √(x - 4)", options: ["[4; +∞)", "(4; +∞)", "(-∞; 4]", "(-∞; +∞)"], ans: 0 },
+            { q: "∛(-27) = ?", options: ["3", "-9", "немає змісту", "-3"], ans: 3 },
+            { q: "Значення f(x) = x² - 3x при x = -2", options: ["2", "-2", "10", "-10"], ans: 2 },
+            { q: "∜16 = ?", options: ["4", "2", "8", "± 2"], ans: 1 }
+        ],
+        medium: [
+            { q: "Спрости: 1 - sin²a", options: ["cos²a", "tg²a", "-cos²a", "1"], ans: 0 },
+            { q: "√(2x - 1) = 3", options: ["4", "10", "5", "2"], ans: 2 },
+            { q: "Найменший додатний період y = cos(2x)", options: ["2π", "π", "π/2", "4π"], ans: 1 },
+            { q: "4^x = 64. x = ?", options: ["2", "4", "3", "16"], ans: 2 }
+        ],
+        hard: [
+            { q: "2 * cos 120° = ?", options: ["-1", "1", "-√3", "√3"], ans: 0 },
+            { q: "Розв'яжіть: √(3x + 4) = 5", options: ["7", "6", "9", "4"], ans: 0 },
+            { q: "10 * sin 150° = ?", options: ["5", "-5", "5√3", "10"], ans: 0 }
+        ]
+    },
+    11: {
+        easy: [
+            { q: "log₂ 8 = ?", options: ["4", "3", "16", "6"], ans: 1 },
+            { q: "Похідна f(x) = x³ + 5x", options: ["3x² + 5", "3x²", "x² + 5", "x⁴/4"], ans: 0 },
+            { q: "3⁴ / 3² = ?", options: ["3", "27", "81", "9"], ans: 3 },
+            { q: "Похідна y = sin x", options: ["-sin x", "cos x", "-cos x", "1"], ans: 1 },
+            { q: "log₅ 25 = ?", options: ["2", "5", "10", "0.5"], ans: 0 }
+        ],
+        medium: [
+            { q: "5^(x+1) = 125. x = ?", options: ["3", "2", "4", "1"], ans: 1 },
+            { q: "Кутовий коеф. дотичної до y=x² у точці x=3", options: ["9", "3", "6", "0"], ans: 2 },
+            { q: "Інтеграл від 0 до 2 для 3x² dx", options: ["4", "8", "12", "6"], ans: 1 },
+            { q: "Первісна для f(x) = 2x", options: ["2", "x² + C", "x²", "2x² + C"], ans: 1 }
+        ],
+        hard: [
+            { q: "Корінь рівняння: log₃(x-2) + log₃ x = 1", options: ["3", "1", "4", "9"], ans: 0 },
+            { q: "Об'єм циліндра 45π, висота 5. Радіус?", options: ["3", "9", "6", "4.5"], ans: 0 },
+            { q: "Найбільше значення f(x) = -x² + 4x - 1", options: ["3", "4", "2", "5"], ans: 0 }
         ]
     }
-    // ДОДАВАЙ І РЕДАГУЙ ЗАДАЧІ ТУТ!
 };
 
 /* =========================================
-   ЛОГІКА ЗАСТОСУНКУ (НЕ ЧІПАТИ БЕЗ ПОТРЕБИ)
+   ЛОГІКА ЗАСТОСУНКУ
    ========================================= */
 
 let state = {
-    grade: null,
-    diff: null,
-    task: null,
-    timeLeft: 0,
-    timerId: null,
-    selectedOption: null
+    grade: null, diff: null, 
+    questions: [], answers: [], 
+    currentIndex: 0, timeLeft: 0, timerId: null
 };
 
-// Відновлення стану після оновлення сторінки
+// Перевіряємо, чи є збережена сесія (щоб не вибивало при випадковому згортанні)
 window.onload = () => {
-    const saved = localStorage.getItem('mathQuestState');
+    const saved = sessionStorage.getItem('mathQuestSession');
     if (saved) {
         state = JSON.parse(saved);
-        if (state.task && state.timeLeft > 0) {
+        if (state.timeLeft > 0 && state.questions.length > 0 && state.answers.length !== state.questions.length + 1) { // +1 як флаг завершення
             renderTaskView();
             startTimer();
             return;
@@ -239,13 +342,12 @@ window.onload = () => {
 };
 
 function saveState() {
-    localStorage.setItem('mathQuestState', JSON.stringify(state));
+    sessionStorage.setItem('mathQuestSession', JSON.stringify(state));
 }
 
 function navTo(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
-    document.getElementById('btn-formula').style.display = (screenId === 'screen-task') ? 'flex' : 'none';
 }
 
 function setGrade(g) {
@@ -253,40 +355,24 @@ function setGrade(g) {
     navTo('screen-diff');
 }
 
-function showTopics(diff) {
-    let t = TOPICS[state.grade] || "Теми з програми обраного класу.";
-    document.getElementById('modal-title').innerText = `Теми (${state.grade} клас)`;
-    document.getElementById('modal-body').innerText = t;
-    document.getElementById('modal').style.display = 'flex';
+function setDifficulty(d) {
+    state.diff = d;
+    document.getElementById('ready-grade').innerText = state.grade + ' клас';
+    document.getElementById('ready-diff').innerText = diffLabels[d];
+    document.getElementById('ready-count').innerText = CONFIG.questionsCount[d];
+    navTo('screen-ready');
 }
 
-function showFormulas() {
-    document.getElementById('modal-title').innerText = "Довідник формул";
-    document.getElementById('modal-body').innerHTML = `
-        <p><strong>Квадратне рівняння:</strong> D = b² - 4ac</p>
-        <p><strong>Арифм. прогресія:</strong> an = a1 + d(n-1)</p>
-        <p><strong>Піфагор:</strong> c² = a² + b²</p>
-        <p><br><em>(Тут можна додати більше формул у коді)</em></p>
-    `;
-    document.getElementById('modal').style.display = 'flex';
-}
-
-function closeModal(e) {
-    if (!e || e.target.classList.contains('modal-overlay') || e.target.classList.contains('close-modal')) {
-        document.getElementById('modal').style.display = 'none';
-    }
-}
-
-function startTask(diff) {
-    if (!TASKS[state.grade] || !TASKS[state.grade][diff] || TASKS[state.grade][diff].length === 0) {
-        alert("Задачі для цього розділу ще не додані!");
-        return;
-    }
-    state.diff = diff;
-    const pool = TASKS[state.grade][diff];
-    state.task = pool[Math.floor(Math.random() * pool.length)]; // Рандомна задача
-    state.timeLeft = CONFIG.time[diff];
-    state.selectedOption = null;
+function startQuiz() {
+    const pool = TASKS[state.grade][state.diff];
+    const count = CONFIG.questionsCount[state.diff];
+    
+    // Перемішуємо пул і беремо потрібну кількість
+    let shuffled = [...pool].sort(() => 0.5 - Math.random());
+    state.questions = shuffled.slice(0, count);
+    state.answers = new Array(count).fill(null);
+    state.currentIndex = 0;
+    state.timeLeft = CONFIG.totalTime;
     
     renderTaskView();
     startTimer();
@@ -296,33 +382,42 @@ function renderTaskView() {
     navTo('screen-task');
     saveState();
     
-    const diffNames = { easy: "Легкий", medium: "Середній", hard: "Складний" };
-    document.getElementById('task-badge').innerText = `${state.grade} клас • ${diffNames[state.diff]}`;
-    document.getElementById('question-text').innerText = state.task.q;
+    document.getElementById('task-badge').innerText = `${state.grade} клас • ${diffLabels[state.diff]}`;
+    document.getElementById('q-counter').innerText = `Питання ${state.currentIndex + 1} з ${state.questions.length}`;
     
-    const inputArea = document.getElementById('input-area');
-    const submitBtn = document.getElementById('btn-submit');
-    inputArea.innerHTML = '';
-    submitBtn.disabled = true;
+    const task = state.questions[state.currentIndex];
+    document.getElementById('question-text').innerText = task.q;
+    
+    const optsArea = document.getElementById('options-area');
+    optsArea.innerHTML = '';
+    
+    const letters = ["А", "Б", "В", "Г"];
+    task.options.forEach((opt, idx) => {
+        let isSelected = state.answers[state.currentIndex] === idx ? 'selected' : '';
+        optsArea.innerHTML += `<button class="option-btn ${isSelected}" onclick="selectOpt(${idx})"><b>${letters[idx]})</b> ${opt}</button>`;
+    });
 
-    if (state.diff === 'hard') {
-        inputArea.innerHTML = `<input type="number" id="num-ans" class="num-input" placeholder="Введіть число" oninput="document.getElementById('btn-submit').disabled = !this.value">`;
+    document.getElementById('btn-prev').disabled = state.currentIndex === 0;
+    
+    // Якщо останнє питання - міняємо кнопку "Наступне" на "Завершити"
+    if (state.currentIndex === state.questions.length - 1) {
+        document.getElementById('btn-next').style.display = 'none';
+        document.getElementById('btn-finish').style.display = 'block';
     } else {
-        const letters = ["А", "Б", "В", "Г"];
-        let html = '<div class="options-list">';
-        state.task.options.forEach((opt, idx) => {
-            html += `<button class="option-btn" onclick="selectOpt(${idx}, this)"><b>${letters[idx]})</b> ${opt}</button>`;
-        });
-        html += '</div>';
-        inputArea.innerHTML = html;
+        document.getElementById('btn-next').style.display = 'block';
+        document.getElementById('btn-finish').style.display = 'none';
     }
 }
 
-function selectOpt(idx, btnEl) {
-    state.selectedOption = idx;
-    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-    btnEl.classList.add('selected');
-    document.getElementById('btn-submit').disabled = false;
+function selectOpt(idx) {
+    state.answers[state.currentIndex] = idx;
+    saveState();
+    renderTaskView(); // перемальовуємо, щоб підсвітити обраний
+}
+
+function changeQuestion(step) {
+    state.currentIndex += step;
+    renderTaskView();
 }
 
 function startTimer() {
@@ -333,8 +428,7 @@ function startTimer() {
         saveState();
         updateTimerUI();
         if (state.timeLeft <= 0) {
-            clearInterval(state.timerId);
-            finishTask(false, "Час вийшов!");
+            finishQuiz(true); // true = закінчився час
         }
     }, 1000);
 }
@@ -344,38 +438,33 @@ function updateTimerUI() {
     const m = Math.floor(state.timeLeft / 60).toString().padStart(2, '0');
     const s = (state.timeLeft % 60).toString().padStart(2, '0');
     t.innerText = `${m}:${s}`;
-    if (state.timeLeft <= 10) t.classList.add('warning');
+    if (state.timeLeft <= 15) t.classList.add('warning');
     else t.classList.remove('warning');
 }
 
-function submitAnswer() {
+function finishQuiz(timeOut = false) {
     clearInterval(state.timerId);
-    let isCorrect = false;
     
-    if (state.diff === 'hard') {
-        const val = document.getElementById('num-ans').value.trim();
-        isCorrect = (val === state.task.ans.toString());
-    } else {
-        isCorrect = (state.selectedOption === state.task.ans);
+    // Рахуємо правильні
+    let correct = 0;
+    for (let i = 0; i < state.questions.length; i++) {
+        if (state.answers[i] === state.questions[i].ans) correct++;
     }
     
-    finishTask(isCorrect, isCorrect ? "Чудова робота!" : "На жаль, помилка.");
-}
-
-function finishTask(isCorrect, msg) {
-    localStorage.removeItem('mathQuestState'); // Очищаємо стейт
+    // Формула: (Правильні / Всього) * Макс.Бал
+    const maxScore = CONFIG.maxPoints[state.diff];
+    const finalScore = Math.round((correct / state.questions.length) * maxScore);
+    
+    sessionStorage.removeItem('mathQuestSession'); // Очищаємо сесію
+    
+    document.getElementById('result-stats').innerText = `Правильно: ${correct} з ${state.questions.length}${timeOut ? ' (Час вийшов)' : ''}`;
+    document.getElementById('result-score').innerText = finalScore;
+    
     navTo('screen-result');
-    
-    const pts = isCorrect ? CONFIG.points[state.diff] : 0;
-    
-    document.getElementById('result-msg').innerText = msg;
-    document.getElementById('result-msg').style.color = isCorrect ? 'var(--success)' : 'var(--danger)';
-    
-    document.getElementById('result-score').innerText = `${pts} БАЛ${pts === 1 ? '' : (pts>1 && pts<5 ? 'И' : 'ІВ')}`;
 }
 
 function resetApp() {
-    state = { grade: null, diff: null, task: null, timeLeft: 0, timerId: null, selectedOption: null };
+    state = { grade: null, diff: null, questions: [], answers: [], currentIndex: 0, timeLeft: 0, timerId: null };
     navTo('screen-grade');
 }
 </script>
