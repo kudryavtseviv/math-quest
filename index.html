@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Math Quest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface: #1e1e1e;
+            --primary: #00ffcc;
+            --primary-hover: #00cca3;
+            --text: #ffffff;
+            --text-secondary: #aaaaaa;
+            --danger: #ff4757;
+            --success: #2ed573;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
+        
+        #app { width: 100%; max-width: 500px; padding: 20px; position: relative; display: flex; flex-direction: column; }
+        .screen { display: none; flex-direction: column; flex-grow: 1; }
+        .screen.active { display: flex; }
+        
+        h1, h2 { text-align: center; margin-bottom: 20px; font-weight: 800; }
+        h1 { font-size: 28px; color: var(--primary); margin-top: 20px; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        
+        button { 
+            background: var(--surface); color: var(--text); border: 2px solid transparent; 
+            padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; 
+            cursor: pointer; transition: 0.2s; 
+        }
+        button:active { transform: scale(0.98); }
+        .btn-grade, .btn-diff { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .btn-grade:hover, .btn-diff:hover { border-color: var(--primary); }
+        .btn-diff { position: relative; }
+        
+        .info-icon { 
+            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); 
+            border-radius: 50%; width: 24px; height: 24px; font-size: 12px; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        
+        .btn-primary { background: var(--primary); color: #000; border: none; width: 100%; margin-top: auto; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { background: #555; color: #888; cursor: not-allowed; }
+        
+        .btn-back { background: transparent; border: 1px solid var(--text-secondary); width: 100%; margin-top: 15px; }
+        
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .timer { font-size: 24px; font-weight: 800; color: var(--primary); }
+        .timer.warning { color: var(--danger); }
+        
+        .question-box { background: var(--surface); padding: 20px; border-radius: 12px; margin-bottom: 20px; font-size: 18px; line-height: 1.5; }
+        
+        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .option-btn { background: var(--surface); border: 2px solid #333; text-align: left; }
+        .option-btn.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
+        
+        .num-input { 
+            width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #333; 
+            background: var(--surface); color: var(--text); font-size: 20px; text-align: center; 
+            margin-bottom: 20px; outline: none; 
+        }
+        .num-input:focus { border-color: var(--primary); }
+        
+        .result-huge { font-size: 48px; text-align: center; font-weight: 800; color: var(--primary); margin: 40px 0; }
+        
+        .floating-btn { 
+            position: fixed; bottom: 20px; right: 20px; background: var(--surface); 
+            border: 2px solid var(--primary); color: var(--primary); border-radius: 50%; 
+            width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; 
+            font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100;
+        }
+
+        /* Modal */
+        .modal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+        }
+        .modal-content { background: var(--surface); padding: 25px; border-radius: 16px; width: 100%; max-width: 400px; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Screen 1: Grade Selection -->
+    <div id="screen-grade" class="screen active">
+        <h1>MATH QUEST</h1>
+        <p style="text-align: center; margin-bottom: 20px; color: var(--text-secondary);">Обери останній закінчений клас</p>
+        <div class="grid">
+            <button class="btn-grade" onclick="setGrade(4)">4 клас</button>
+            <button class="btn-grade" onclick="setGrade(5)">5 клас</button>
+            <button class="btn-grade" onclick="setGrade(6)">6 клас</button>
+            <button class="btn-grade" onclick="setGrade(7)">7 клас</button>
+            <button class="btn-grade" onclick="setGrade(8)">8 клас</button>
+            <button class="btn-grade" onclick="setGrade(9)">9 клас</button>
+            <button class="btn-grade" onclick="setGrade(10)">10 клас</button>
+            <button class="btn-grade" onclick="setGrade(11)">11 клас</button>
+        </div>
+    </div>
+
+    <!-- Screen 2: Difficulty Selection -->
+    <div id="screen-diff" class="screen">
+        <h2>Обери складність</h2>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button class="btn-diff" onclick="startTask('easy')">
+                <span style="color: var(--success); font-size: 20px;">🟢 Легкий</span>
+                <span class="info-icon" onclick="event.stopPropagation(); showTopics('easy')">i</span>
+            </button>
+            <button class="btn-diff" onclick="startTask('medium')">
+                <span style="color: #ffa502; font-size: 20px;">🟡 Середній</span>
+                <span class="info-icon" onclick="event.stopPropagation(); showTopics('medium')">i</span>
+            </button>
+            <button class="btn-diff" onclick="startTask('hard')">
+                <span style="color: var(--danger); font-size: 20px;">🔴 Складний</span>
+                <span class="info-icon" onclick="event.stopPropagation(); showTopics('hard')">i</span>
+            </button>
+        </div>
+        <button class="btn-back" onclick="navTo('screen-grade')">← Назад</button>
+    </div>
+
+    <!-- Screen 3: Task -->
+    <div id="screen-task" class="screen">
+        <div class="header-bar">
+            <div id="task-badge" style="background: var(--surface); padding: 5px 12px; border-radius: 8px; font-weight: 600;"></div>
+            <div id="timer" class="timer">00:00</div>
+        </div>
+        <div class="question-box" id="question-text">Завантаження...</div>
+        
+        <div id="input-area"></div>
+
+        <button id="btn-submit" class="btn-primary" onclick="submitAnswer()" disabled>Підтвердити</button>
+    </div>
+
+    <!-- Screen 4: Result -->
+    <div id="screen-result" class="screen">
+        <h2>РЕЗУЛЬТАТ</h2>
+        <div id="result-msg" style="text-align: center; font-size: 20px;"></div>
+        <div id="result-score" class="result-huge">0 БАЛІВ</div>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px;">Покажи цей екран адміністратору</p>
+        <button class="btn-primary" onclick="resetApp()">На головну</button>
+    </div>
+    
+    <button class="floating-btn" id="btn-formula" onclick="showFormulas()" style="display: none;">ƒ</button>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 id="modal-title" style="margin-bottom: 15px;"></h3>
+        <div id="modal-body" style="color: var(--text-secondary); line-height: 1.6;"></div>
+    </div>
+</div>
+
+<script>
+/* =========================================
+   АДМІН-ПАНЕЛЬ (НАЛАШТУВАННЯ ТА ЗАДАЧІ)
+   ========================================= */
+
+const CONFIG = {
+    points: { easy: 1, medium: 2, hard: 3 },
+    time: { easy: 45, medium: 90, hard: 150 } // в секундах
+};
+
+// Тут зберігаються теми для відображення по кнопці "i"
+const TOPICS = {
+    4: "Арифметика, час, периметр.",
+    8: "Лінійні рівняння, корені, теорема Піфагора, площі.",
+    9: "Системи, нерівності, вектори, прогресії, ймовірність.",
+    10: "Функції, тригонометрія, ірраціональні рівняння.",
+    11: "Логарифми, похідна, інтеграл, об'єми тіл."
+    // Для інших класів можна додати за аналогією
+};
+
+// ОСНОВНИЙ МАСИВ ЗАДАЧ
+// Структура: TASKS[клас][складність] = [ { q: "Питання", options: ["А","Б","В","Г"], ans: 0 }, ... ]
+// Для складного рівня (hard) масиву options немає, ans - це число/рядок.
+const TASKS = {
+    4: {
+        easy: [
+            { q: "Обчисли: 1200 - 350", options: ["950", "850", "800", "750"], ans: 1 }
+        ],
+        medium: [
+            { q: "Автомобіль їхав 3 год зі швидкістю 60 км/год. Яку відстань він проїхав?", options: ["20 км", "180 км", "120 км", "240 км"], ans: 1 }
+        ],
+        hard: [
+            { q: "Периметр квадрата дорівнює 36 см. Знайди його площу (у см²).", ans: "81" }
+        ]
+    },
+    9: {
+        easy: [
+            { q: "У коробці 4 червоні та 6 білих кульок. Яка ймовірність витягнути червону?", options: ["0.4", "0.6", "4", "0.1"], ans: 0 },
+            { q: "Перший член арифм. прогресії a1 = 5, різниця d = 3. Знайдіть a3.", options: ["8", "14", "11", "15"], ans: 2 }
+        ],
+        medium: [
+            { q: "Знайдіть модуль вектора m(-3; 4).", options: ["7", "1", "25", "5"], ans: 3 },
+            { q: "Розв'яжіть нерівність x² - 4 > 0.", options: ["x > 2", "x є (-2; 2)", "x є (-∞;-2) U (2;+∞)", "x < 4"], ans: 2 }
+        ],
+        hard: [
+            { q: "У геом. прогресії b1 = 2, q = 3. Знайдіть b4.", ans: "54" },
+            { q: "Скільки цілих розв'язків має нерівність x² - 5x - 6 <= 0?", ans: "8" }
+        ]
+    }
+    // ДОДАВАЙ І РЕДАГУЙ ЗАДАЧІ ТУТ!
+};
+
+/* =========================================
+   ЛОГІКА ЗАСТОСУНКУ (НЕ ЧІПАТИ БЕЗ ПОТРЕБИ)
+   ========================================= */
+
+let state = {
+    grade: null,
+    diff: null,
+    task: null,
+    timeLeft: 0,
+    timerId: null,
+    selectedOption: null
+};
+
+// Відновлення стану після оновлення сторінки
+window.onload = () => {
+    const saved = localStorage.getItem('mathQuestState');
+    if (saved) {
+        state = JSON.parse(saved);
+        if (state.task && state.timeLeft > 0) {
+            renderTaskView();
+            startTimer();
+            return;
+        }
+    }
+    navTo('screen-grade');
+};
+
+function saveState() {
+    localStorage.setItem('mathQuestState', JSON.stringify(state));
+}
+
+function navTo(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    document.getElementById('btn-formula').style.display = (screenId === 'screen-task') ? 'flex' : 'none';
+}
+
+function setGrade(g) {
+    state.grade = g;
+    navTo('screen-diff');
+}
+
+function showTopics(diff) {
+    let t = TOPICS[state.grade] || "Теми з програми обраного класу.";
+    document.getElementById('modal-title').innerText = `Теми (${state.grade} клас)`;
+    document.getElementById('modal-body').innerText = t;
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function showFormulas() {
+    document.getElementById('modal-title').innerText = "Довідник формул";
+    document.getElementById('modal-body').innerHTML = `
+        <p><strong>Квадратне рівняння:</strong> D = b² - 4ac</p>
+        <p><strong>Арифм. прогресія:</strong> an = a1 + d(n-1)</p>
+        <p><strong>Піфагор:</strong> c² = a² + b²</p>
+        <p><br><em>(Тут можна додати більше формул у коді)</em></p>
+    `;
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal(e) {
+    if (!e || e.target.classList.contains('modal-overlay') || e.target.classList.contains('close-modal')) {
+        document.getElementById('modal').style.display = 'none';
+    }
+}
+
+function startTask(diff) {
+    if (!TASKS[state.grade] || !TASKS[state.grade][diff] || TASKS[state.grade][diff].length === 0) {
+        alert("Задачі для цього розділу ще не додані!");
+        return;
+    }
+    state.diff = diff;
+    const pool = TASKS[state.grade][diff];
+    state.task = pool[Math.floor(Math.random() * pool.length)]; // Рандомна задача
+    state.timeLeft = CONFIG.time[diff];
+    state.selectedOption = null;
+    
+    renderTaskView();
+    startTimer();
+}
+
+function renderTaskView() {
+    navTo('screen-task');
+    saveState();
+    
+    const diffNames = { easy: "Легкий", medium: "Середній", hard: "Складний" };
+    document.getElementById('task-badge').innerText = `${state.grade} клас • ${diffNames[state.diff]}`;
+    document.getElementById('question-text').innerText = state.task.q;
+    
+    const inputArea = document.getElementById('input-area');
+    const submitBtn = document.getElementById('btn-submit');
+    inputArea.innerHTML = '';
+    submitBtn.disabled = true;
+
+    if (state.diff === 'hard') {
+        inputArea.innerHTML = `<input type="number" id="num-ans" class="num-input" placeholder="Введіть число" oninput="document.getElementById('btn-submit').disabled = !this.value">`;
+    } else {
+        const letters = ["А", "Б", "В", "Г"];
+        let html = '<div class="options-list">';
+        state.task.options.forEach((opt, idx) => {
+            html += `<button class="option-btn" onclick="selectOpt(${idx}, this)"><b>${letters[idx]})</b> ${opt}</button>`;
+        });
+        html += '</div>';
+        inputArea.innerHTML = html;
+    }
+}
+
+function selectOpt(idx, btnEl) {
+    state.selectedOption = idx;
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btnEl.classList.add('selected');
+    document.getElementById('btn-submit').disabled = false;
+}
+
+function startTimer() {
+    clearInterval(state.timerId);
+    updateTimerUI();
+    state.timerId = setInterval(() => {
+        state.timeLeft--;
+        saveState();
+        updateTimerUI();
+        if (state.timeLeft <= 0) {
+            clearInterval(state.timerId);
+            finishTask(false, "Час вийшов!");
+        }
+    }, 1000);
+}
+
+function updateTimerUI() {
+    const t = document.getElementById('timer');
+    const m = Math.floor(state.timeLeft / 60).toString().padStart(2, '0');
+    const s = (state.timeLeft % 60).toString().padStart(2, '0');
+    t.innerText = `${m}:${s}`;
+    if (state.timeLeft <= 10) t.classList.add('warning');
+    else t.classList.remove('warning');
+}
+
+function submitAnswer() {
+    clearInterval(state.timerId);
+    let isCorrect = false;
+    
+    if (state.diff === 'hard') {
+        const val = document.getElementById('num-ans').value.trim();
+        isCorrect = (val === state.task.ans.toString());
+    } else {
+        isCorrect = (state.selectedOption === state.task.ans);
+    }
+    
+    finishTask(isCorrect, isCorrect ? "Чудова робота!" : "На жаль, помилка.");
+}
+
+function finishTask(isCorrect, msg) {
+    localStorage.removeItem('mathQuestState'); // Очищаємо стейт
+    navTo('screen-result');
+    
+    const pts = isCorrect ? CONFIG.points[state.diff] : 0;
+    
+    document.getElementById('result-msg').innerText = msg;
+    document.getElementById('result-msg').style.color = isCorrect ? 'var(--success)' : 'var(--danger)';
+    
+    document.getElementById('result-score').innerText = `${pts} БАЛ${pts === 1 ? '' : (pts>1 && pts<5 ? 'И' : 'ІВ')}`;
+}
+
+function resetApp() {
+    state = { grade: null, diff: null, task: null, timeLeft: 0, timerId: null, selectedOption: null };
+    navTo('screen-grade');
+}
+</script>
+
+</body>
+</html>
