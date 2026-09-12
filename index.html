@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Math Quest</title>
+    <title>Математика</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -81,7 +81,11 @@
 <div id="app">
     <!-- Екран 1: Вибір класу -->
     <div id="screen-grade" class="screen active">
-        <h1>MATH QUEST</h1>
+        <div style="text-align: center; margin-top: 15px; margin-bottom: 25px;">
+            <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary); letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase;">Точка</div>
+            <h1 style="margin: 0; font-size: 34px; letter-spacing: 1px; text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);">МАТЕМАТИКА</h1>
+        </div>
+        
         <p style="text-align: center; margin-bottom: 20px; color: var(--text-secondary);">Обери останній закінчений клас</p>
         <div class="grid">
             <button class="btn-grade" onclick="setGrade(4)">4 клас</button>
@@ -189,7 +193,7 @@ const CONFIG = {
 const diffLabels = { easy: "Легкий", medium: "Середній", hard: "Складний" };
 
 /* =========================================
-   БАЗА ЗАВДАНЬ (По 5 унікальних завдань на кожну категорію)
+   БАЗА ЗАВДАНЬ
    ========================================= */
 const TASKS = {
     4: {
@@ -419,7 +423,6 @@ function setDifficulty(d) {
     document.getElementById('ready-diff').innerText = diffLabels[d];
     document.getElementById('ready-count').innerText = CONFIG.questionsCount[d];
     
-    // Динамічний підрахунок часу для відображення
     const mins = Math.floor(CONFIG.totalTime / 60);
     const secs = CONFIG.totalTime % 60;
     let timeString = `${mins} хвилин${mins === 1 ? 'а' : (mins > 1 && mins < 5 ? 'и' : '')}`;
