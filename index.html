@@ -13,9 +13,12 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
         
-        #app { width: 100%; max-width: 500px; padding: 20px; position: relative; display: flex; flex-direction: column; }
+        /* Використовуємо dvh, щоб на мобільних телефонах нижня панель браузера не перекривала кнопки */
+        body { background-color: var(--bg-color); color: var(--text); display: flex; justify-content: center; min-height: 100dvh; }
+        
+        /* Збільшено padding-bottom до 50px, щоб кнопки були гарантовано вище */
+        #app { width: 100%; max-width: 500px; padding: 20px 20px 50px 20px; position: relative; display: flex; flex-direction: column; }
         .screen { display: none; flex-direction: column; flex-grow: 1; }
         .screen.active { display: flex; }
         
@@ -33,6 +36,15 @@
         .btn-grade { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .btn-grade:hover, .btn-diff:hover { border-color: var(--primary); }
         
+        .btn-diff { position: relative; padding-right: 50px; text-align: left; padding-left: 20px; }
+        .info-icon { 
+            position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
+            background: rgba(255,255,255,0.1); border-radius: 50%; width: 30px; height: 30px; 
+            font-size: 14px; display: flex; align-items: center; justify-content: center; 
+            color: var(--text); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .info-icon:active { background: rgba(255,255,255,0.3); }
+
         .btn-primary { background: var(--primary); color: #000; border: none; width: 100%; }
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-outline { background: transparent; border: 2px solid var(--text-secondary); width: 100%; }
@@ -78,6 +90,7 @@
             line-height: 1.4;
         }
 
+        /* Modal */
         .modal-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 20px;
@@ -89,11 +102,13 @@
 <body>
 
 <div id="app">
+    <!-- Екран 1: Вибір класу -->
     <div id="screen-grade" class="screen active">
         <div style="text-align: center; margin-top: 15px; margin-bottom: 25px;">
             <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary); letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase;">Точка</div>
             <h1 style="margin: 0; font-size: 34px; letter-spacing: 1px; text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);">МАТЕМАТИКА</h1>
         </div>
+        
         <p style="text-align: center; margin-bottom: 20px; color: var(--text-secondary);">Обери останній закінчений клас</p>
         <div class="grid">
             <button class="btn-grade" onclick="setGrade(4)">4 клас</button>
@@ -107,16 +122,27 @@
         </div>
     </div>
 
+    <!-- Екран 2: Вибір складності -->
     <div id="screen-diff" class="screen">
         <h2>Обери складність</h2>
         <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
-            <button class="btn-diff" onclick="setDifficulty('easy')">🟢 Легкий (Макс. 6 балів)</button>
-            <button class="btn-diff" onclick="setDifficulty('medium')">🟡 Середній (Макс. 8 балів)</button>
-            <button class="btn-diff" onclick="setDifficulty('hard')">🔴 Складний (Макс. 10 балів)</button>
+            <button class="btn-diff" onclick="setDifficulty('easy')">
+                🟢 Легкий <span style="font-size: 12px; font-weight: 400; display: block; margin-top: 3px;">(Макс. 6 балів)</span>
+                <span class="info-icon" onclick="event.stopPropagation(); showTopics()">i</span>
+            </button>
+            <button class="btn-diff" onclick="setDifficulty('medium')">
+                🟡 Середній <span style="font-size: 12px; font-weight: 400; display: block; margin-top: 3px;">(Макс. 8 балів)</span>
+                <span class="info-icon" onclick="event.stopPropagation(); showTopics()">i</span>
+            </button>
+            <button class="btn-diff" onclick="setDifficulty('hard')">
+                🔴 Складний <span style="font-size: 12px; font-weight: 400; display: block; margin-top: 3px;">(Макс. 10 балів)</span>
+                <span class="info-icon" onclick="event.stopPropagation(); showTopics()">i</span>
+            </button>
         </div>
         <button class="btn-outline" style="margin-top: auto;" onclick="navTo('screen-grade')">← Назад</button>
     </div>
 
+    <!-- Екран 3: Готовність -->
     <div id="screen-ready" class="screen">
         <h2>ПІДГОТОВКА</h2>
         <div class="question-box" style="text-align: center;">
@@ -127,15 +153,18 @@
             <hr style="border-color: #333; margin: 15px 0;">
             <p style="font-size: 14px; margin-bottom: 10px;">Ти можеш пропускати завдання і повертатися до них. Таймер спільний для всіх завдань.</p>
         </div>
+
         <div class="hint-box">
             <b style="color: var(--warning);">💡 УВАГА:</b> У деяких завданнях тобі доступна підказка з формулою. Якщо побачиш кнопку <b>💡</b> у кутку екрана — сміливо натискай!
         </div>
+
         <div class="nav-buttons" style="margin-top: auto;">
             <button class="btn-outline" onclick="navTo('screen-diff')">Назад</button>
             <button class="btn-primary" onclick="startQuiz()">ПОЧАТИ</button>
         </div>
     </div>
 
+    <!-- Екран 4: Завдання -->
     <div id="screen-task" class="screen">
         <div class="header-bar">
             <div id="task-badge" style="background: var(--surface); padding: 5px 12px; border-radius: 8px; font-weight: 600;"></div>
@@ -143,7 +172,9 @@
         </div>
         <div class="question-counter" id="q-counter">Питання 1 з 5</div>
         <div class="question-box" id="question-text">Завантаження...</div>
+        
         <div class="options-list" id="options-area"></div>
+
         <div class="nav-buttons">
             <button class="btn-outline" id="btn-prev" onclick="changeQuestion(-1)">← Попереднє</button>
             <button class="btn-primary" id="btn-next" onclick="changeQuestion(1)">Наступне →</button>
@@ -151,19 +182,23 @@
         <button class="btn-primary" id="btn-finish" style="display: none; margin-top: 10px; background: var(--success);" onclick="finishQuiz()">Завершити тест</button>
     </div>
 
+    <!-- Екран 5: Результат -->
     <div id="screen-result" class="screen">
         <h2>РЕЗУЛЬТАТ</h2>
         <div id="result-stats" style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;"></div>
         <div id="summary-dots" class="summary-dots"></div>
+        
         <div id="result-score" class="result-huge">0</div>
         <p style="text-align: center; font-weight: 600; margin-bottom: 5px;">БАЛІВ</p>
         <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">Покажи цей екран адміністратору</p>
+        
         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
             <button class="btn-outline" onclick="navTo('screen-review')">Переглянути деталі</button>
             <button class="btn-primary" onclick="resetApp()">На головну</button>
         </div>
     </div>
 
+    <!-- Екран 6: Перегляд відповідей -->
     <div id="screen-review" class="screen">
         <h2>ВІДПОВІДІ</h2>
         <div id="review-list" style="overflow-y: auto; flex-grow: 1; margin-bottom: 20px;"></div>
@@ -173,18 +208,41 @@
     <button class="floating-btn" id="btn-hint" onclick="showHint()" style="display: none;">💡</button>
 </div>
 
+<!-- Modal -->
 <div id="modal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h3 style="margin-bottom: 15px;">Підказка</h3>
-        <div id="modal-body" style="font-size: 18px; text-align: center; padding: 10px 0; line-height: 1.5;"></div>
+        <h3 id="modal-title" style="margin-bottom: 15px; color: var(--primary);">Підказка</h3>
+        <div id="modal-body" style="font-size: 16px; text-align: center; padding: 10px 0; line-height: 1.5; color: var(--text);"></div>
     </div>
 </div>
 
 <script>
-const CONFIG = { totalTime: 135, maxPoints: { easy: 6, medium: 8, hard: 10 }, questionsCount: { easy: 5, medium: 4, hard: 3 } };
+/* =========================================
+   КОНФІГУРАЦІЯ ТА ТЕМИ
+   ========================================= */
+const CONFIG = {
+    totalTime: 135, // 2 хвилини 15 секунд
+    maxPoints: { easy: 6, medium: 8, hard: 10 },
+    questionsCount: { easy: 5, medium: 4, hard: 3 } 
+};
+
 const diffLabels = { easy: "Легкий", medium: "Середній", hard: "Складний" };
 
+const TOPICS = {
+    4: "Арифметика, час, периметри та площі фігур.",
+    5: "Десяткові та звичайні дроби, відсотки, середнє арифметичне, лінійні рівняння.",
+    6: "Від'ємні числа, модулі, пропорції, лінійні рівняння, відсотки.",
+    7: "Властивості степенів, формули скороченого множення, суміжні та вертикальні кути, трикутники.",
+    8: "Квадратні корені, квадратні рівняння, теорема Піфагора, площі фігур.",
+    9: "Прогресії, вектори, ймовірність, нерівності, квадратична функція.",
+    10: "Тригонометрія, ірраціональні та показникові рівняння, парність функцій.",
+    11: "Логарифми, похідна, первісна (інтеграл), об'єми тіл обертання."
+};
+
+/* =========================================
+   БАЗА ЗАВДАНЬ
+   ========================================= */
 const TASKS = {
     4: {
         easy: [
@@ -228,7 +286,7 @@ const TASKS = {
     5: {
         easy: [
             { q: "Обчисліть: 2.5 + 1.75", options: ["3.25", "4.25", "4.05", "3.75"], ans: 1 },
-            { q: "Знайдіть 10% від числа 200.", options: ["10", "20", "2", "50"], ans: 1, hint: "1% — це сота частина числа." },
+            { q: "Знайдіть 10% від числа 200.", options: ["10", "20", "2", "50"], ans: 1, hint: "Щоб знайти 1% від числа, його треба поділити на 100." },
             { q: "Який дріб більший: 1/2 чи 1/3?", options: ["1/2", "1/3", "Рівні", "Неможливо визначити"], ans: 0 },
             { q: "Знайдіть середнє арифметичне чисел 2 та 14.", options: ["7", "8", "6", "16"], ans: 1, hint: "Середнє арифметичне: сума чисел ділиться на їх кількість." },
             { q: "Перетворіть десятковий дріб 0.75 у звичайний.", options: ["1/4", "3/4", "1/2", "3/5"], ans: 1 },
@@ -245,10 +303,10 @@ const TASKS = {
         ],
         medium: [
             { q: "Обчисліть: 12.3 - 5.85", options: ["6.45", "7.45", "6.55", "7.55"], ans: 0 },
-            { q: "Знайдіть середнє арифметичне чисел 2, 5 та 8.", options: ["5", "4", "6", "15"], ans: 0, hint: "Середнє арифметичне: (a + b + c) / 3" },
-            { q: "У класі 30 учнів, з них 20% — відмінники. Скільки відмінників у класі?", options: ["5", "6", "8", "4"], ans: 1 },
+            { q: "Знайдіть середнє арифметичне чисел 2, 5 та 8.", options: ["5", "4", "6", "15"], ans: 0, hint: "Формула середнього арифметичного трьох чисел:<br>(a + b + c) / 3" },
+            { q: "У класі 30 учнів, з них 20% — відмінники. Скільки відмінників у класі?", options: ["5", "6", "8", "4"], ans: 1, hint: "Формула знаходження відсотка від числа:<br>(Число &times; Відсоток) / 100" },
             { q: "Розв'яжіть рівняння: 2x = 7.2", options: ["3.6", "3.1", "14.4", "4.2"], ans: 0 },
-            { q: "Скільки дорівнює 3/4 від числа 20?", options: ["10", "12", "15", "16"], ans: 2 },
+            { q: "Скільки дорівнює 3/4 від числа 20?", options: ["10", "12", "15", "16"], ans: 2, hint: "Щоб знайти дріб від числа, поділіть це число на знаменник і помножте на чисельник." },
             { q: "Знайдіть 15% від числа 200.", options: ["15", "20", "30", "45"], ans: 2 },
             { q: "Знайдіть середнє арифметичне чисел 4, 5 та 9.", options: ["5", "6", "7", "8"], ans: 1 },
             { q: "Обчисліть: 2.4 &times; 0.5", options: ["1.4", "1.2", "12", "0.12"], ans: 1 },
@@ -283,7 +341,7 @@ const TASKS = {
             { q: "Обчисліть: 5 - (-3)", options: ["2", "8", "-2", "-8"], ans: 1 }
         ],
         medium: [
-            { q: "Обчисліть: |-12| - |-4| &times; 2", options: ["4", "16", "8", "-4"], ans: 0 },
+            { q: "Обчисліть: |-12| - |-4| &times; 2", options: ["4", "16", "8", "-4"], ans: 0, hint: "Пріоритет операцій: спочатку модуль, потім множення, потім віднімання." },
             { q: "Відстань на карті 3 см, масштаб 1:100 000. Яка це відстань на місцевості?", options: ["3 км", "30 км", "300 м", "300 км"], ans: 0, hint: "Масштаб показує, скільком сантиметрам на місцевості відповідає 1 см на карті." },
             { q: "Обчисліть: -18 / (-3) + 2", options: ["8", "-4", "-8", "4"], ans: 0 },
             { q: "Розв'яжіть рівняння: 3x - 5 = 10", options: ["4", "5", "15", "-5"], ans: 1 },
@@ -368,7 +426,7 @@ const TASKS = {
             { q: "Розв'яжіть рівняння: 5 / (x - 2) = 1", options: ["7", "3", "5", "1"], ans: 0 },
             { q: "Обчисліть: (&radic;3 - 1)<sup>2</sup>", options: ["4 - 2&radic;3", "2", "4", "3 - 2&radic;3"], ans: 0, hint: "Формула квадрата різниці: (a - b)<sup>2</sup> = a<sup>2</sup> - 2ab + b<sup>2</sup>" },
             { q: "У прямокутному трикутнику катет дорівнює 8, а гіпотенуза 17. Знайдіть інший катет.", options: ["15", "12", "9", "25"], ans: 0, hint: "Теорема Піфагора: a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup>" },
-            { q: "Спростіть вираз: &radic;18 - &radic;8", options: ["&radic;2", "&radic;10", "2&radic;2", "1"], ans: 0, hint: "Винесіть множник з-під кореня: &radic;18 = &radic;(9 &times; 2)." },
+            { q: "Спростіть вираз: &radic;18 - &radic;8", options: ["&radic;2", "&radic;10", "2&radic;2", "1"], ans: 0, hint: "Винесіть множник з-під знака кореня: &radic;18 = &radic;(9 &times; 2)." },
             { q: "Площа трапеції з основами 6 і 10 та висотою 4 дорівнює:", options: ["32", "64", "16", "48"], ans: 0, hint: "Площа трапеції: S = (a + b) / 2 &times; h" },
             { q: "Розв'яжіть рівняння: 2x<sup>2</sup> - 18 = 0", options: ["-3 і 3", "3", "-9 і 9", "9"], ans: 0 }
         ],
@@ -522,6 +580,13 @@ function navTo(screenId) {
 
 function setGrade(g) { state.grade = g; navTo('screen-diff'); }
 
+function showTopics() {
+    let t = TOPICS[state.grade] || "Теми з програми обраного класу.";
+    document.getElementById('modal-title').innerText = `Теми (${state.grade} клас)`;
+    document.getElementById('modal-body').innerHTML = `<b>Можливі теми:</b><br><br>${t}`;
+    document.getElementById('modal').style.display = 'flex';
+}
+
 function setDifficulty(d) {
     state.diff = d;
     document.getElementById('ready-grade').innerText = state.grade + ' клас';
@@ -579,6 +644,7 @@ function renderTaskView() {
 }
 
 function showHint() {
+    document.getElementById('modal-title').innerText = "Підказка";
     document.getElementById('modal-body').innerHTML = state.questions[state.currentIndex].hint;
     document.getElementById('modal').style.display = 'flex';
 }
